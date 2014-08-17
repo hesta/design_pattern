@@ -66,6 +66,9 @@ template <typename T> void
 LQueue_Node<T>::free_list_allocate (size_t n)
 {
   // @@ This allocates one more than requested.
+  if(n == 0)
+    return;
+
   LQueue_Node<T> *temp = new LQueue_Node<T>;
   free_list_ = temp;
 

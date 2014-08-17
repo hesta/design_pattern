@@ -112,7 +112,7 @@ Options::parse_args (int argc, char *argv[])
       }
 
   return true;
-};
+}
 
 // Parse the command line arguments.
 void

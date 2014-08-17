@@ -25,12 +25,8 @@ template <typename T, typename QUEUE> STLQueue_Adapter<T, QUEUE> &
 STLQueue_Adapter<T, QUEUE>::operator= (const STLQueue_Adapter &rhs)
 {
   // You fill in here.
-  if(this != &rhs)
-    {
-    QUEUE temp(rhs.queue_);
-    queue_.swap(temp);
-    }
-  return *this;
+ 
+  return queue_ = rhs.queue_;
 }
 
 // Place a <new_item> at the tail of the queue.  Throws the
@@ -44,7 +40,8 @@ STLQueue_Adapter<T, QUEUE>::enqueue (const T &new_item)
   try{
     queue_.push(new_item);
   }
-  catch(...){
+  // @@ Don't catch ... - just catch the std::bad_alloc exception.
+  catch(std::bad_alloc){
     throw Overflow();
   }
 

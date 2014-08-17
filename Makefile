@@ -1,61 +1,49 @@
-#############################################################################
-#
-#  makefile for tree traversal
-#
-#############################################################################
-#
-#  If you move this makefile, update the variable below
-#  or else depend won't work.
-#
-#############################################################################
-
-MAKEFILE	= Makefile
-CC		= g++
-CFILES		= main.cpp getopt.cpp Tree_Factory_Impl.cpp Traversal_Strategy_Impl.cpp Options.cpp Tree_Factory.cpp Traversal_Strategy.cpp
-HFILES		= LQueue.h AQueue.h Array.h Queue.h getopt.h Queue.h Tree_Factory_Impl.h Traversal_Strategy_Impl.h Options.h Typedefs.h Tree_Factory.h Traversal_Strategy.h Tree.h Node.h Refcounter.h
-OFILES		= main.o getopt.o Tree_Factory_Impl.o Traversal_Strategy_Impl.o Options.o Tree_Factory.o Traversal_Strategy.o
-
-#############################################################################
-# Flags for Installation
-#############################################################################
-BINDIR		= .
-#############################################################################
-
-DFLAGS		= -ggdb
-IFLAGS          = 
-OPTFLAGS	=  # Enable this flag if compiler supports templates...
-LDFLAGS		= -g
-CFLAGS		= $(IFLAGS) $(OPTFLAGS) $(DFLAGS) $(CPPFLAGS)
+CXX      := g++
+CXXFLAGS := -g #-Wall -Wextra -Werror -pedantic-errors
 CPPFLAGS := -std=c++0x
 
-#############################################################################
-# G++ directives
-#############################################################################
-.SUFFIXES: .C .cpp
-.cpp.o:
-	$(CC) $(CFLAGS) -c $<
-#############################################################################
+target   := main
+# Uncomment this line if you are an undergraduate student
+#sources  := UnitTest4D.cpp AQueue.cpp Array.cpp Queue.cpp getopt.cpp Options.cpp Visitor.cpp Print_Visitor.cpp Tree_Iterator_Impl.cpp Factories.cpp
+# Uncomment this line if you are a graduate student
+sources  := UnitTest4D.cpp Interpreter.cpp LQueue.cpp AQueue.cpp Array.cpp Queue.cpp getopt.cpp Options.cpp Visitor.cpp Print_Visitor.cpp Eval_Visitor.cpp
+objects  := $(sources:.cpp=.o)
+depends  := $(sources:.cpp=.dep)
 
-all: tree-traversal
+$(target): $(objects) gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -lpthread -o $@
 
-tree-traversal: $(OFILES)
-	$(CC) $(LDFLAGS) $(OFILES) -o $@
+include $(depends)
+include Makefile-gtest
 
-clean:
-	/bin/rm -f *.o *.out *~ core
+.PHONY: view docs clean-docs clean-deps clean realclean
 
-realclean: clean
-	/bin/rm -rf tree-traversal
+view:
+	gedit Array.h Array.cpp ../*.txt &
 
-depend:
-	g++dep -f $(MAKEFILE) $(CFILES)
+docs: clean-docs
+	doxygen doxygen.conf
+	firefox docs/classArray.html
 
-# DO NOT DELETE THIS LINE -- g++dep uses it.
-# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
+clean-docs:
+	$(RM) -r docs
 
-main.o: main.cpp Tree.h Node.h Node.cpp Typedefs.h Tree.cpp \
-  Tree_Factory.h Traversal_Strategy.h Options.h Refcounter.h
-getopt.o: getopt.cpp
-Options.o: Options.cpp Options.h getopt.h
+clean-deps:
+	$(RM) $(depends)
 
-# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+clean: clean-deps clean-docs
+	$(RM) $(objects) *~ *.tmp
+
+realclean: clean clean-gtest
+	$(RM) $(target)
+
+%.dep: %.cpp
+	@set -e; \
+	$(CXX) -MM $(CPPFLAGS) $< > $@.tmp; \
+	(echo -n "$@ " | cat - $@.tmp) > $@; \
+	$(RM) $@.tmp; \
+	echo -n "Generating deps [$<]:\n ";\
+	cat $@
+
+
+%.h %.cpp: ;
